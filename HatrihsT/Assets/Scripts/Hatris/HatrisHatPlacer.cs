@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -27,7 +28,6 @@ public class HatrisHatPlacer : MonoBehaviour
 
     [SerializeField] HexCoordinates cellCo;
 
-    GameObject HatTab;
     public List<Button> player1buttons = new List<Button>();
     public List<Button> player2buttons = new List<Button>();
 
@@ -37,6 +37,9 @@ public class HatrisHatPlacer : MonoBehaviour
     private String reverseTag = "Reverse Hat";
 
     private Vector3 lastMousePosition;
+
+    private Dictionary<GameObject, bool> flashingObjects = new Dictionary<GameObject, bool>();
+
 
     public enum Team
     {
@@ -64,14 +67,14 @@ public class HatrisHatPlacer : MonoBehaviour
         landCell = hexGrid.GetCell(transform.position);
         currentCell = landCell;
         validityCheck = this.GetComponent<ChecksValid>();
-        HatTab = GameObject.Find("HatTab");
-        if (HatTab)
+        HatTab hatTab = GameObject.Find("HatTab").GetComponent<HatTab>();
+        if (hatTab)
         {
-            foreach (Button button in HatTab.transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0).GetComponentsInChildren<Button>())
+            foreach (Button button in hatTab.pinks.GetComponentsInChildren<Button>())
             {
                 player1buttons.Add(button);
             }
-            foreach (Button button in HatTab.transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1).GetComponentsInChildren<Button>())
+            foreach (Button button in hatTab.purples.GetComponentsInChildren<Button>())
             {
                 player2buttons.Add(button);
             }
@@ -334,6 +337,8 @@ public class HatrisHatPlacer : MonoBehaviour
                             if (meshCells[i].hatPieceAbove != null)
                             {
                                 PlacementError(meshCells[i].hatPieceAbove.gameObject);
+
+                        Debug.Log("object " + i + ": " + meshCells[i].hatPieceAbove.gameObject);
                             }
                         }
 
@@ -459,10 +464,12 @@ public class HatrisHatPlacer : MonoBehaviour
 
     void Score(HexCell cell)
     {
+        Color teamColour = teamMat.color;
+
         for (int i = 0; i < 6; i++)
         {
             Destroy(cell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove);
-            cell.transform.GetChild(0).GetChild(i).gameObject.GetComponent<MeshRenderer>().material = teamMat;
+            cell.transform.GetChild(0).GetChild(i).gameObject.GetComponent<MeshRenderer>().material.color = teamColour;
             cell.playerCellScored = (int)team;
             cell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove = null;
             cell.hasHat = false;
@@ -519,18 +526,43 @@ public class HatrisHatPlacer : MonoBehaviour
 
     IEnumerator FlashPiece(int amountTimes, GameObject piece)
     {
+        if (piece == null) yield break;
+
+        // Check if this specific piece is already flashing
+        if (flashingObjects.TryGetValue(piece, out bool isFlashing) && isFlashing)
+        {
+            yield break;
+        }
+
+        flashingObjects[piece] = true; // Mark this piece as flashing
+
+        MeshRenderer renderer = piece.GetComponent<MeshRenderer>();
+        if (renderer == null) yield break;
+
+        Color originalColour = renderer.material.color;
+        Color flashColour = Color.red;
+
         for (int i = 0; i < amountTimes; i++)
         {
-            if (piece != null)
-            {
-                piece.transform.localScale *= 1.5f;
-                yield return new WaitForSeconds(0.2f);
-            }
-            if (piece != null)
-            {
-                piece.transform.localScale /= 1.5f;
-                yield return new WaitForSeconds(0.2f);
-            }
+            if (piece == null) break;
+
+            renderer.material.color = flashColour;
+            piece.transform.localScale *= 1.5f;
+            yield return new WaitForSeconds(0.2f);
+
+            if (piece == null) break;
+
+            renderer.material.color = originalColour;
+            piece.transform.localScale /= 1.5f;
+            yield return new WaitForSeconds(0.2f);
         }
+
+        // Reset flashing state
+        if (piece != null)
+        {
+            renderer.material.color = originalColour;
+        }
+
+        flashingObjects[piece] = false;
     }
-}
+ }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.UI;
 
 public class NotificationTriggerEvent : MonoBehaviour
@@ -21,28 +22,32 @@ public class NotificationTriggerEvent : MonoBehaviour
     [Header("Notification Animation")]
     [SerializeField] private Animator notificationAnim;
 
+    public ObjectiveProgressItem progressItem;
 
-    public void TriggerNotification()
+    public void TriggerNotification(NotificationScriptable notification)
     {
-        EnableNotification();
+        StartCoroutine(EnableNotification(notification));
     }
 
-    IEnumerator EnableNotification()
+    IEnumerator EnableNotification(NotificationScriptable notification)
     {
         notificationAnim.Play("NotificationFadeIn");
-        notificationTextUI.text = notificationMessage;
-        notificationIconUI.sprite = yourIcon;
+        notificationTextUI.text = notification.notificationMessage;
+        notificationIconUI.sprite = notification.yourIcon;
 
-        if (disableAfterTimer)
+        progressItem.progressText.text = notification.progressItemText;
+
+        if (notification.disableAfterTimer)
         {
-            yield return new WaitForSeconds(disableTimer);
+            yield return new WaitForSeconds(notification.disableTimer);
             RemoveNotification();
         }
     }
 
-    private void RemoveNotification()
+    public void RemoveNotification()
     {
         notificationAnim.Play("NotificationFadeOut");
-        gameObject.SetActive(false);
+        notificationTextUI.text = "";
+        notificationIconUI.sprite = null;
     }
 }

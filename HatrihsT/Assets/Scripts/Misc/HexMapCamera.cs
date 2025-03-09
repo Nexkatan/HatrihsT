@@ -6,7 +6,7 @@ public class HexMapCamera : MonoBehaviour
 
     Transform swivel, stick;
 
-    float zoom = 1f;
+    public float zoom = 0f;
 
     public float stickMinZoom, stickMaxZoom, swivelMinZoom, swivelMaxZoom, moveSpeedMinZoom, moveSpeedMaxZoom, minPitch, maxPitch, currentPitch, currentYaw, rotationSpeed, rotationAngle, swivelSpeed, swivelAngle, dragRotationSpeed;
 
@@ -27,20 +27,37 @@ public class HexMapCamera : MonoBehaviour
         instance = this;
     }
 
+    private void Start()
+    {
+        Debug.Log(zoom);
+    }
+
 
     void Update()
     {
-        float zoomDelta = Input.GetAxis("Mouse ScrollWheel");
+        float zoomDelta = 0f; // Initialize zoom change
+
+        // Read scroll wheel input
+        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+        if (scrollInput != 0f)
+        {
+            zoomDelta = scrollInput; // Use scroll input if available
+        }
+
+        // Read Q & E input
+        if (Input.GetKey(KeyCode.Q))
+        {
+            zoomDelta -= 0.001f; // Adjust for smooth zoom
+        }
+        if (Input.GetKey(KeyCode.E))
+        {
+            zoomDelta += 0.001f;
+        }
+
+        // Apply zoom only if there's a change
         if (zoomDelta != 0f)
         {
             AdjustZoom(zoomDelta);
-        }
-
-        float rotationDelta = Input.GetAxis("Rotation");
-        
-        if (rotationDelta != 0f)
-        {
-            AdjustRotation(rotationDelta);
         }
 
         float xDelta = Input.GetAxis("Horizontal");
@@ -49,13 +66,6 @@ public class HexMapCamera : MonoBehaviour
         if (xDelta != 0f || zDelta != 0f)
         {
             AdjustPosition(xDelta, zDelta);
-        }
-        
-        float sDelta = Input.GetAxis("Swivel");
-
-        if (sDelta != 0f)
-        {
-            AdjustSwivel(sDelta);
         }
 
         if (Input.GetMouseButton(1))
@@ -86,25 +96,12 @@ public class HexMapCamera : MonoBehaviour
     {
         zoom = Mathf.Clamp01(zoom + delta);
 
+        Debug.Log(zoom);
+
         float distance = Mathf.Lerp(stickMinZoom, stickMaxZoom, zoom);
         stick.localPosition = new Vector3(0f, 0f, distance);
 
         float angle = Mathf.Lerp(swivelMinZoom, swivelMaxZoom, zoom);
-        //swivel.localRotation = Quaternion.Euler(angle, 0f, 0f);
-    }
-
-    void AdjustSwivel(float sDelta)
-    {
-        swivelAngle += sDelta * swivelSpeed * Time.deltaTime;
-        if (swivelAngle < swivelMinZoom)
-        {
-            swivelAngle = swivelMinZoom;
-        }
-        if (swivelAngle > swivelMaxZoom)
-        {
-            swivelAngle = swivelMaxZoom;
-        }
-        swivel.localRotation = Quaternion.Euler(swivelAngle, 0f, 0f);
     }
 
     void AdjustPosition(float xDelta, float zDelta)
@@ -154,19 +151,6 @@ public class HexMapCamera : MonoBehaviour
         transform.localPosition = ClampPosition(position);
     }
 
-    void AdjustRotation(float delta)
-    {
-        rotationAngle += delta * rotationSpeed * Time.deltaTime;
-        if (rotationAngle < 0f)
-        {
-            rotationAngle += 360f;
-        }
-        else if (rotationAngle >= 360f)
-        {
-            rotationAngle -= 360f;
-        }
-        transform.localRotation = Quaternion.Euler(0f, -rotationAngle, 0f);
-    }
     Vector3 ClampPosition(Vector3 position)
     {
         float xMax =

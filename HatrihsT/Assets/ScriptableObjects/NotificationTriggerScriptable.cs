@@ -19,6 +19,8 @@ public class NotificationTriggerScriptable : MonoBehaviour
 
     public List<NotificationScriptable> objectives = new List<NotificationScriptable>();
 
+    public ObjectiveProgressItem progressItem;
+    
     public void TriggerNotification(NotificationScriptable notification)
     {
         StartCoroutine(EnableNotification(notification));
@@ -29,6 +31,8 @@ public class NotificationTriggerScriptable : MonoBehaviour
         notificationAnim.Play("NotificationFadeIn");
         notificationTextUI.text = notification.notificationMessage;
         notificationIconUI.sprite = notification.yourIcon;
+
+        progressItem.progressText.text = notification.progressItemText;
 
         if (notification.disableAfterTimer)
         {

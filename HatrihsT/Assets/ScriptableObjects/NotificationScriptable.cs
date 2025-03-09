@@ -9,8 +9,12 @@ public class NotificationScriptable : ScriptableObject
     [Header("Message Customisation")]
     public Sprite yourIcon;
     [TextArea] public string notificationMessage;
+    [TextArea] public string progressItemText;
 
     [Header("Notification Removal")]
     public bool disableAfterTimer = false;
     public float disableTimer = 1.0f;
+
+    public ObjectiveProgressItem progress;
+    
 }

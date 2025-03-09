@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: ObjectiveSc 6
   m_EditorClassIdentifier: 
   yourIcon: {fileID: 21300000, guid: a1406b04319bcbe42a19f74b542b93a3, type: 3}
-  notificationMessage: Learn Controls!
+  notificationMessage: 6
+  progressItemText: 
   disableAfterTimer: 0
   disableTimer: 1
+  progress: {fileID: 5368579256872213765, guid: 66132bc8f30718b49839167fbb4226e9, type: 3}

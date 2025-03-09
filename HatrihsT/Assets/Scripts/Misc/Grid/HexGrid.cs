@@ -52,6 +52,8 @@ public class HexGrid : MonoBehaviour
         
         cam.transform.position = new Vector3(170f, 0f, 110f);
 
+        cam.zoom = 0.925f;
+
         cellCountX = chunkCountX * HexMetrics.chunkSizeX;
         cellCountZ = chunkCountZ * HexMetrics.chunkSizeZ;
     }
