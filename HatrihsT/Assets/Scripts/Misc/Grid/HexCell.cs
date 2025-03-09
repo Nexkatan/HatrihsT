@@ -22,6 +22,8 @@ public class HexCell : MonoBehaviour
     public GameObject hatAbove;
     public Material hatAboveMat;
 
+    public ParticleSystem particle;
+
     [SerializeField]
     HexCell[] neighbors;
     HexCell[] longbois;

@@ -6,6 +6,7 @@ using UnityEngine;
 public class HatrisHexCell : MonoBehaviour
 {
     public GameObject hatPieceAbove;
+    public GameObject potentialPieceAbove;
 
     public float radius;
     public float floorRadius;

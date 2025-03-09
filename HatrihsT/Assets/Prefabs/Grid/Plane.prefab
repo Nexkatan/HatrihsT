@@ -33,7 +33,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5920209988125743442
 MeshFilter:
@@ -122,12 +122,26 @@ MonoBehaviour:
   coordinates:
     x: 0
     z: 0
-  color: {r: 0, g: 0, b: 0, a: 0}
+  terrainTypeIndex: 0
+  hatMatIndex: 0
   inlaySize: 0
   hasHat: 0
   hasReverseHat: 0
+  hasSuperTile1: 0
+  hasSuperTile2: 0
+  hasSuperTile3: 0
+  hasSuperTile4: 0
+  hasWallHat: 0
   isBinHat: 0
   hatRot: 0
   hatRotInt: 0
   hatAbove: {fileID: 0}
+  hatAboveMat: {fileID: 0}
+  particle: {fileID: 3601096500326721774, guid: b144346e29896504c8d872b3bd519b19, type: 3}
   neighbors: []
+  uiRect: {fileID: 0}
+  chunk: {fileID: 0}
+  isHatrisCell: 0
+  playerCellScored: 0
+  isReverseHatMove: 0
+  moveIntRotation: 0

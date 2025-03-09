@@ -50,13 +50,21 @@ MonoBehaviour:
     x: 0
     z: 0
   terrainTypeIndex: 0
+  hatMatIndex: 0
   inlaySize: 1.001
   hasHat: 0
   hasReverseHat: 0
+  hasSuperTile1: 0
+  hasSuperTile2: 0
+  hasSuperTile3: 0
+  hasSuperTile4: 0
+  hasWallHat: 0
   isBinHat: 0
   hatRot: 0
   hatRotInt: 0
   hatAbove: {fileID: 0}
+  hatAboveMat: {fileID: 0}
+  particle: {fileID: 3601096500326721774, guid: b144346e29896504c8d872b3bd519b19, type: 3}
   neighbors:
   - {fileID: 0}
   - {fileID: 0}
@@ -68,6 +76,8 @@ MonoBehaviour:
   chunk: {fileID: 0}
   isHatrisCell: 0
   playerCellScored: 0
+  isReverseHatMove: 0
+  moveIntRotation: 0
 --- !u!23 &-1388119450502175174
 MeshRenderer:
   m_ObjectHideFlags: 0

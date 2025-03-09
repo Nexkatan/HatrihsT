@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ public class HatrisHatPlacer : MonoBehaviour
 
     public HexCell currentCell;
     public HexCell landCell;
+    private HexCell lastHoveredCell = null;
 
     public HexCell neighbour1;
     public HexCell neighbour2;
@@ -30,6 +32,7 @@ public class HatrisHatPlacer : MonoBehaviour
 
     public List<Button> player1buttons = new List<Button>();
     public List<Button> player2buttons = new List<Button>();
+
 
     private ChecksValid validityCheck;
 
@@ -62,6 +65,9 @@ public class HatrisHatPlacer : MonoBehaviour
     private SFXClips rotateClips;
 
     private bool isCameraMoving;
+
+    private HexCell[] presentValidCells = new HexCell[4];
+
     public void Start()
     {
         hexGrid = GameObject.FindObjectOfType<HexGrid>();
@@ -87,7 +93,11 @@ public class HatrisHatPlacer : MonoBehaviour
         scoreKeeper = GameObject.Find("GameManager").GetComponent<HatrisScoreKeeper>();
 
         rotateClips = GetComponent<SFXClips>();
-    }
+
+
+
+        List<HexCell> presentValidCells = new List<HexCell>(4);
+}
 
     void FixedUpdate()
     {
@@ -155,9 +165,11 @@ public class HatrisHatPlacer : MonoBehaviour
 
     void MouseMove()
     {
-        if (GetCellUnderCursor() != null)
+        HexCell currentCell = GetCellUnderCursor();
+
+        // Check if the current cell is valid
+        if (currentCell != null)
         {
-            HexCell currentCell = GetCellUnderCursor();
             HexCell stayCell = hexGrid.GetCell(transform.position);
             if (isSelected)
             {
@@ -196,6 +208,64 @@ public class HatrisHatPlacer : MonoBehaviour
                         transform.position = new Vector3(transform.position.x, -1f, transform.position.z);
                     }
                 }
+            }
+            if (currentCell != lastHoveredCell)
+            {
+                for (int i = 0; i < presentValidCells.Length; i++)
+                {
+                    if (presentValidCells[i] != null)
+                    {
+                        for (int j = 0; j < 6; j++)
+                        {
+                            presentValidCells[i].transform.GetChild(0).GetChild(j).gameObject.GetComponent<MeshRenderer>().material.color = Color.yellow;
+                        }
+                        presentValidCells[i] = null;
+                    }
+                }
+
+                bool wouldScore = false;
+                List<HexCell> currentValidCells;
+                if (CheckIfPlacementScores(currentCell, out currentValidCells))
+                {
+
+                    if (currentValidCells != null)
+                    {
+                        wouldScore = true;
+
+                        if (currentValidCells.Count > 0)
+                        {
+                            Debug.Log(presentValidCells.Length);
+
+                            for (int i = 0; i < currentValidCells.Count; i++)
+                            {
+                                presentValidCells[i] = currentValidCells[i];
+                            }
+                        }
+
+                        for (int i = 0; i < 3 - currentValidCells.Count; i++)
+                        {
+                            presentValidCells[3 - i] = null;
+                        }
+                    }
+
+                    if (wouldScore)
+                    {
+
+                        for (int i = 0; i < currentValidCells.Count; i++)
+                        {
+                            for (int j = 0; j < 6; j++)
+                            {
+                                presentValidCells[i].transform.GetChild(0).GetChild(j).gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    wouldScore = false;
+                }
+
+                lastHoveredCell = currentCell;
             }
         }
     }
@@ -608,4 +678,198 @@ public class HatrisHatPlacer : MonoBehaviour
         }
     }
 
+    public bool CheckIfPlacementScores(HexCell landCell, out List<HexCell> validCells)
+    {
+        validCells = new List<HexCell>();  // Initialize the list to store valid HexCells
+        thisHatRot = transform.eulerAngles;
+        thisHatRotInt = Mathf.RoundToInt(thisHatRot.y / 60) % 6;
+
+        HexCell currentCheckCell = landCell;
+        HatrisHexCell[] currentMeshCells = new HatrisHexCell[8];
+        int currentLandPiecesCount = 0;
+
+        if (landCell != null && landCell.transform.GetChild(0).childCount == 6)
+        {
+            if (CompareTag("Hat"))
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    currentMeshCells[i] = landCell.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 4) % 6)) % 6).GetComponent<HatrisHexCell>();
+                }
+
+                neighbour1 = landCell.GetNeighbor((HexDirection)((thisHatRotInt + 4) % 6));
+                neighbour2 = landCell.GetNeighbor((HexDirection)((thisHatRotInt + 5) % 6));
+
+                if (neighbour1 != null && neighbour1.transform.GetChild(0).childCount == 6 && neighbour2 != null && neighbour2.transform.GetChild(0).childCount == 6)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        currentMeshCells[i + 4] = neighbour1.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 1) % 6)) % 6).GetComponent<HatrisHexCell>();
+                        currentMeshCells[i + 6] = neighbour2.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 3) % 6)) % 6).GetComponent<HatrisHexCell>();
+                    }
+
+                    for (int i = 0; i < currentMeshCells.Length; i++)
+                    {
+                        if (currentMeshCells[i].hatPieceAbove != null)
+                        {
+                            currentLandPiecesCount++;
+                        }
+                    }
+                }
+            }
+            else if (CompareTag("Reverse Hat"))
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    currentMeshCells[i] = landCell.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 5) % 6)) % 6).GetComponent<HatrisHexCell>();
+                }
+
+                neighbour1 = landCell.GetNeighbor((HexDirection)((thisHatRotInt) % 6));
+                neighbour2 = landCell.GetNeighbor((HexDirection)((thisHatRotInt + 1) % 6));
+
+                if (neighbour1 != null && neighbour1.transform.GetChild(0).childCount == 6 && neighbour2 != null && neighbour2.transform.GetChild(0).childCount == 6)
+                {
+                    for (int i = 0; i < 2; i++)
+                    {
+                        currentMeshCells[i + 4] = neighbour2.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 4) % 6)) % 6).GetComponent<HatrisHexCell>();
+                        currentMeshCells[i + 6] = neighbour1.transform.GetChild(0).GetChild((thisHatRotInt + ((i + 2) % 6)) % 6).GetComponent<HatrisHexCell>();
+                    }
+
+                    for (int i = 0; i < currentMeshCells.Length; i++)
+                    {
+                        if (currentMeshCells[i].hatPieceAbove != null)
+                        {
+                            currentLandPiecesCount++;
+                        }
+                    }
+                }
+            }
+
+            if (neighbour1 != null && neighbour1.transform.GetChild(0).childCount == 6 && neighbour2 != null && neighbour2.transform.GetChild(0).childCount == 6)
+            {
+                int meshPiecesCount = 0;
+
+                for (int i = 0; i < 8; i++)
+                {
+                    if (currentMeshCells[i] == null)
+                    {
+                        meshPiecesCount++;
+                    }
+                }
+
+                GameObject[] hatPieces = new GameObject[8];
+
+                for (int i = 0; i < 8; i++)
+                {
+                    hatPieces[i] = transform.GetChild(0).GetChild(0).GetChild(i).gameObject;
+                }
+
+                if (CompareTag("Hat"))
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        currentMeshCells[i].potentialPieceAbove = hatPieces[i];
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        currentMeshCells[j].potentialPieceAbove = hatPieces[3 - j];
+                    }
+                    for (int k = 0; k < 2; k++)
+                    {
+                        currentMeshCells[4 + k].potentialPieceAbove = hatPieces[5 - k];
+                        currentMeshCells[6 + k].potentialPieceAbove = hatPieces[7 - k];
+                    }
+                }
+
+                if (meshPiecesCount > 0)
+                {
+                    Debug.Log("Neighbour invalid");
+                }
+                else
+                {
+                    int count2a = 0, count3a = 0, count4a = 0, count2b = 0, count3b = 0, count4b = 0;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
+                        {
+                            count2a++;
+                        }
+                        if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count2b++;
+                        }
+                        if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count2b = count2b + 10;
+                        }
+
+                        if (neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
+                        {
+                            count3a++;
+                        }
+                        if (neighbour1 && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count3b++;
+                        }
+                        if (neighbour1 && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count3b = count3b + 10;
+                        }
+
+                        if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
+                        {
+                            count4a++;
+                        }
+                        if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count4b++;
+                        }
+                        if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
+                        {
+                            count4b = count4b + 10;
+                        }
+                    }
+
+                    if (CompareTag("Hat"))
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            currentMeshCells[i].potentialPieceAbove = null;
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j < 4; j++)
+                        {
+                            currentMeshCells[j].potentialPieceAbove = null;
+                        }
+                        for (int k = 0; k < 2; k++)
+                        {
+                            currentMeshCells[4 + k].potentialPieceAbove = null;
+                            currentMeshCells[6 + k].potentialPieceAbove = null;
+                        }
+                    }
+
+                    if (count2a + count2b == 6)
+                    {
+                        validCells.Add(landCell);
+                    }
+                    if (count3a + count3b == 6)
+                    {
+                        validCells.Add(neighbour1);
+                    }
+                    if (count4a + count4b == 6)
+                    {
+                        validCells.Add(neighbour2);
+                    }
+                }
+            }
+        }
+
+        return validCells.Count > 0;  // Return true if there are valid cells, otherwise false
+    }
 }
