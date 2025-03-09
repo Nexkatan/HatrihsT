@@ -39,7 +39,9 @@ public class HatrisHatPlacer : MonoBehaviour
     private Vector3 lastMousePosition;
 
     private Dictionary<GameObject, bool> flashingObjects = new Dictionary<GameObject, bool>();
+    private Dictionary<GameObject, Coroutine> activeCoroutines = new Dictionary<GameObject, Coroutine>();
 
+    private Vector3 originalScale = new Vector3(90,90,100);
 
     public enum Team
     {
@@ -336,7 +338,7 @@ public class HatrisHatPlacer : MonoBehaviour
                         {
                             if (meshCells[i].hatPieceAbove != null)
                             {
-                                PlacementError(meshCells[i].hatPieceAbove.gameObject);
+                                TriggerFlash(3,meshCells[i].hatPieceAbove.gameObject);
 
                         Debug.Log("object " + i + ": " + meshCells[i].hatPieceAbove.gameObject);
                             }
@@ -367,6 +369,8 @@ public class HatrisHatPlacer : MonoBehaviour
                             {
                                 hatPieces[i] = transform.GetChild(0).GetChild(0).GetChild(i).gameObject;
                                 hatPieces[i].name = "hatPiece " + i;
+                                hatPieces[i].GetComponent<HatrisHatPiece>().colour = hatPieces[i].GetComponent<MeshRenderer>().material.color;
+                                hatPieces[i].GetComponent<HatrisHatPiece>().scale = hatPieces[i].gameObject.transform.localScale;
                             }
 
                             if (CompareTag("Hat"))
@@ -519,50 +523,89 @@ public class HatrisHatPlacer : MonoBehaviour
         isSelected = true;
     }
 
-    void PlacementError(GameObject piece)
+    public void TriggerFlash(int amountTimes, GameObject piece)
     {
-        StartCoroutine(FlashPiece(3, piece));
+        Color originalColour = piece.GetComponent<MeshRenderer>().material.color;
+        if (activeCoroutines.ContainsKey(piece))
+        {
+            StopCoroutine(activeCoroutines[piece]);
+            flashingObjects[piece] = false;  // Reset flashing state
+            ResetPiece(piece, piece.GetComponent<HatrisHatPiece>().colour );  // Immediately reset the piece (color and scale)
+        }
+
+        // Start the flash coroutine
+        activeCoroutines[piece] = StartCoroutine(FlashPiece(amountTimes, piece));
     }
 
-    IEnumerator FlashPiece(int amountTimes, GameObject piece)
+    // Flashing piece coroutine
+    private IEnumerator FlashPiece(int amountTimes, GameObject piece)
     {
         if (piece == null) yield break;
 
-        // Check if this specific piece is already flashing
-        if (flashingObjects.TryGetValue(piece, out bool isFlashing) && isFlashing)
-        {
-            yield break;
-        }
-
-        flashingObjects[piece] = true; // Mark this piece as flashing
+        // Mark this piece as flashing
+        flashingObjects[piece] = true;
 
         MeshRenderer renderer = piece.GetComponent<MeshRenderer>();
         if (renderer == null) yield break;
 
+        // Save the original color and scale before flashing
         Color originalColour = renderer.material.color;
+
         Color flashColour = Color.red;
 
         for (int i = 0; i < amountTimes; i++)
         {
             if (piece == null) break;
 
+            // Flashing effect
             renderer.material.color = flashColour;
-            piece.transform.localScale *= 1.5f;
+            piece.transform.localScale = originalScale * 1.5f;
             yield return new WaitForSeconds(0.2f);
 
             if (piece == null) break;
 
+            // Revert to original color and scale
             renderer.material.color = originalColour;
-            piece.transform.localScale /= 1.5f;
+            piece.transform.localScale = originalScale;
             yield return new WaitForSeconds(0.2f);
+
+            // Check if the flash is interrupted
+            if (!flashingObjects.ContainsKey(piece) || !flashingObjects[piece])
+            {
+                // If interrupted, reset the piece immediately
+                ResetPiece(piece, piece.GetComponent<HatrisHatPiece>().colour);
+                break;
+            }
         }
 
-        // Reset flashing state
+        // Reset the flashing state and remove the coroutine after finishing
+        flashingObjects[piece] = false;
+        activeCoroutines.Remove(piece);
+
+        // Ensure the piece is reset after flashing completes
         if (piece != null)
         {
-            renderer.material.color = originalColour;
+            ResetPiece(piece, piece.GetComponent<HatrisHatPiece>().colour);
         }
-
-        flashingObjects[piece] = false;
     }
- }
+
+    // Reset the piece to its original state (color and scale)
+    private void ResetPiece(GameObject piece, Color colour)
+    {
+        // Check if the piece is null or destroyed before attempting to reset
+        if (piece != null)
+        {
+            MeshRenderer renderer = piece.GetComponent<MeshRenderer>();
+            if (renderer != null)
+            {
+                // Reset the color to its original state
+                renderer.material.color = renderer.material.color;
+            }
+
+            // Reset the scale to its original state
+            piece.transform.localScale = originalScale;
+            piece.GetComponent<MeshRenderer>().material.color = colour;
+        }
+    }
+
+}
