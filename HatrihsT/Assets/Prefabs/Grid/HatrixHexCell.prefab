@@ -49,7 +49,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hatPieceAbove: {fileID: 0}
   potentialPieceAbove: {fileID: 0}
-  particle: {fileID: 3601096500326721774, guid: b144346e29896504c8d872b3bd519b19, type: 3}
   radius: 5
   floorRadius: 8
   height: 5

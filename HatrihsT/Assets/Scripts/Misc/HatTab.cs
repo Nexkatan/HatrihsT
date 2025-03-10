@@ -7,10 +7,13 @@ public class HatTab : MonoBehaviour
 {
     public GameObject pinks;
     public GameObject purples;
+    public GameObject hints;
     public Button pinkLeft;
     public Button pinkRight;
     public Button purpleLeft;
     public Button purpleRight;
+    public Button hintsLeft;
+    public Button hintsRight;
 
     public Button expand;
     public Button collapse;

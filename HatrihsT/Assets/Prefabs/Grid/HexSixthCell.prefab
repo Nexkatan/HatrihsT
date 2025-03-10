@@ -66,7 +66,7 @@ MonoBehaviour:
   hatRotInt: 0
   hatAbove: {fileID: 0}
   hatAboveMat: {fileID: 0}
-  particle: {fileID: 3601096500326721774, guid: b144346e29896504c8d872b3bd519b19, type: 3}
+  shineMat: {fileID: 2100000, guid: 32ad13ff878d16c49bb4616e43503be1, type: 2}
   neighbors:
   - {fileID: 0}
   - {fileID: 0}

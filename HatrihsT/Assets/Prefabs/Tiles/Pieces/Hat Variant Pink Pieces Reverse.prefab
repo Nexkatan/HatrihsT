@@ -59,6 +59,7 @@ MonoBehaviour:
     z: 0
   player1buttons: []
   player2buttons: []
+  glowColor: {r: 0.5849056, g: 0.5766287, b: 0.5766287, a: 1}
   team: 1
   defaultMat: {fileID: 2100000, guid: 696b7dc96bf76fa49bfa66c86b991263, type: 2}
   scoreKeeper: {fileID: 0}
@@ -371,6 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &469157274077385549 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8137564596025207753, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -389,6 +391,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &978208262276050227 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8935120597757466039, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -407,6 +410,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &1516233294398699264 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7162440610313260932, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -425,6 +429,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &2476927999924903610 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6067324000088024638, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -443,6 +448,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &5430525310162065420 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4409514502814867592, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -493,6 +499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!4 &6013848107164353171 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2673410919230552599, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -516,6 +523,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}
 --- !u!1 &9156631364433019538 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 684059350971972118, guid: 8a0b8ba97868e4e4c9ff25178b9d3444, type: 3}
@@ -534,3 +542,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colour: {r: 0, g: 0, b: 0, a: 0}
+  scale: {x: 0, y: 0, z: 0}

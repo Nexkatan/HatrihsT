@@ -21,14 +21,13 @@ public class HexCell : MonoBehaviour
     public int hatRotInt;
     public GameObject hatAbove;
     public Material hatAboveMat;
-
-    public ParticleSystem particle;
+    public Material shineMat;
 
     [SerializeField]
     HexCell[] neighbors;
     HexCell[] longbois;
 
-    public RectTransform uiRect;
+    public Vector2 uiRect;
 
     public HexGridChunk chunk;
 
@@ -52,6 +51,17 @@ public class HexCell : MonoBehaviour
     {
         neighbors[(int)direction] = cell;
         cell.neighbors[(int)direction.Opposite()] = this;
+    }
+
+    public void ResetNeighbour(HexCell hexCell)
+    {
+        for (int i = 0; i < hexCell.neighbors.Length; i++)
+        {
+
+            hexCell.neighbors[i] = null;
+            neighbors[i] = null;
+        }
+
     }
 
     public Material Color

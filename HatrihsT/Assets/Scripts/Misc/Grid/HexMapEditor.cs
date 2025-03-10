@@ -37,7 +37,6 @@ public class HexMapEditor : MonoBehaviour
         HexCell currentCell = GetCellUnderCursor();
         if (currentCell)
         {
-            //Debug.Log(currentCell.coordinates);
 		}
         else
         {

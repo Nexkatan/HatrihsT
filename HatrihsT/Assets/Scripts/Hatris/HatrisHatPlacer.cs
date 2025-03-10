@@ -46,6 +46,9 @@ public class HatrisHatPlacer : MonoBehaviour
 
     private Vector3 originalScale = new Vector3(90,90,100);
 
+    public Color glowColor;
+    private bool isGlowing;
+
     public enum Team
     {
         None,
@@ -97,7 +100,7 @@ public class HatrisHatPlacer : MonoBehaviour
 
 
         List<HexCell> presentValidCells = new List<HexCell>(4);
-}
+    }
 
     void FixedUpdate()
     {
@@ -130,6 +133,7 @@ public class HatrisHatPlacer : MonoBehaviour
                     if ((currentMousePosition-lastMousePosition).magnitude < 100f)
                     {
                         Spin(1);
+                        updateGlow();
                     }
                 lastMousePosition = currentMousePosition;
             }
@@ -146,6 +150,7 @@ public class HatrisHatPlacer : MonoBehaviour
                 if ((currentMousePosition - lastMousePosition).magnitude < 100f)
                 {
                     Spin(-1);
+                    updateGlow();
                 }
                 lastMousePosition = currentMousePosition;
             }
@@ -170,106 +175,105 @@ public class HatrisHatPlacer : MonoBehaviour
         // Check if the current cell is valid
         if (currentCell != null)
         {
-            HexCell stayCell = hexGrid.GetCell(transform.position);
             if (isSelected)
             {
                 this.transform.position = (currentCell.transform.position);
             }
-            if (this.CompareTag("Hat"))
+
+            CheckOnBoard();
+
+            updateGlow();
+            
+        }
+    }
+
+
+    void CheckOnBoard()
+    {
+        HexCell currentCell = GetCellUnderCursor();
+
+        if (this.CompareTag("Hat"))
+        {
+            neighbour1 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 4) % 6));
+            neighbour2 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 5) % 6));
+
+
+            if (neighbour1 && neighbour2)
             {
-                neighbour1 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 4) % 6));
-                neighbour2 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 5) % 6));
-
-                if (neighbour1 && neighbour2)
+                if (currentCell.isHatrisCell && neighbour1.isHatrisCell && neighbour2.isHatrisCell)
                 {
-                    if (currentCell.isHatrisCell && neighbour1.isHatrisCell && neighbour2.isHatrisCell)
-                    {
-                        transform.position = new Vector3(transform.position.x, 5f, transform.position.z);
-                    }
-                    else
-                    {
-                        transform.position = new Vector3(transform.position.x, -1f, transform.position.z);
-                    }
-                }
-            }
-            else if (this.CompareTag("Reverse Hat"))
-            {
-                neighbour1 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt) % 6));
-                neighbour2 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 1) % 6));
-
-                if (neighbour1 && neighbour2)
-                {
-                    if (currentCell.isHatrisCell && neighbour1.isHatrisCell && neighbour2.isHatrisCell)
-                    {
-                        transform.position = new Vector3(transform.position.x, 5f, transform.position.z);
-                    }
-                    else
-                    {
-                        transform.position = new Vector3(transform.position.x, -1f, transform.position.z);
-                    }
-                }
-            }
-            if (currentCell != lastHoveredCell)
-            {
-                for (int i = 0; i < presentValidCells.Length; i++)
-                {
-                    if (presentValidCells[i] != null)
-                    {
-                        for (int j = 0; j < 6; j++)
-                        {
-                            presentValidCells[i].transform.GetChild(0).GetChild(j).gameObject.GetComponent<MeshRenderer>().material.color = Color.yellow;
-                        }
-                        presentValidCells[i] = null;
-                    }
-                }
-
-                bool wouldScore = false;
-                List<HexCell> currentValidCells;
-                if (CheckIfPlacementScores(currentCell, out currentValidCells))
-                {
-
-                    if (currentValidCells != null)
-                    {
-                        wouldScore = true;
-
-                        if (currentValidCells.Count > 0)
-                        {
-                            Debug.Log(presentValidCells.Length);
-
-                            for (int i = 0; i < currentValidCells.Count; i++)
-                            {
-                                presentValidCells[i] = currentValidCells[i];
-                            }
-                        }
-
-                        for (int i = 0; i < 3 - currentValidCells.Count; i++)
-                        {
-                            presentValidCells[3 - i] = null;
-                        }
-                    }
-
-                    if (wouldScore)
-                    {
-
-                        for (int i = 0; i < currentValidCells.Count; i++)
-                        {
-                            for (int j = 0; j < 6; j++)
-                            {
-                                presentValidCells[i].transform.GetChild(0).GetChild(j).gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-                            }
-                        }
-                    }
+                    transform.position = new Vector3(transform.position.x, 5f, transform.position.z);
                 }
                 else
                 {
-                    wouldScore = false;
+                    Debug.Log("current: " + currentCell.isHatrisCell);
+                    Debug.Log("neighbour1: " + neighbour1.isHatrisCell);
+                    Debug.Log("neighbour2: " + neighbour2.isHatrisCell);
+                    transform.position = new Vector3(transform.position.x, -1f, transform.position.z);
                 }
+            }
+        }
+        else if (this.CompareTag("Reverse Hat"))
+        {
+            neighbour1 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt) % 6));
+            neighbour2 = currentCell.GetNeighbor((HexDirection)((thisHatRotInt + 1) % 6));
 
-                lastHoveredCell = currentCell;
+            if (neighbour1 && neighbour2)
+            {
+                if (currentCell.isHatrisCell && neighbour1.isHatrisCell && neighbour2.isHatrisCell)
+                {
+                    transform.position = new Vector3(transform.position.x, 5f, transform.position.z);
+                }
+                else
+                {
+                    transform.position = new Vector3(transform.position.x, -1f, transform.position.z);
+                }
             }
         }
     }
 
+    void updateGlow()
+    {
+        SetGlow(false);
+
+        bool wouldScore = false;
+        List<HexCell> currentValidCells;
+
+        HexCell currentCell = GetCellUnderCursor();
+
+        if (CheckIfPlacementScores(currentCell, out currentValidCells))
+        {
+            Debug.Log("Check check");
+            if (currentValidCells != null)
+            {
+                wouldScore = true;
+
+                if (currentValidCells.Count > 0)
+                {
+                    for (int i = 0; i < currentValidCells.Count; i++)
+                    {
+                        presentValidCells[i] = currentValidCells[i];
+                    }
+                }
+
+                for (int i = 0; i < 3 - currentValidCells.Count; i++)
+                {
+                    presentValidCells[3 - i] = null;
+                }
+            }
+
+            if (wouldScore)
+            {
+                SetGlow(true);
+            }
+        }
+        else
+        {
+            wouldScore = false;
+        }
+
+        lastHoveredCell = currentCell;
+    }
     void Spin(float direction)
     {
             Vector3 m_EulerAngleVelocity = new Vector3(0, 60 * direction, 0);
@@ -281,6 +285,7 @@ public class HatrisHatPlacer : MonoBehaviour
             {
                 rotateClips.PlayRandomRotateClip();
             }
+        updateGlow();
     }
     public void FlipHat()
     {
@@ -288,8 +293,8 @@ public class HatrisHatPlacer : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Vector3 m_EulerAngleVelocityPos = new Vector3(0, 60, 0);
-                Vector3 m_EulerAngleVelocityNeg = new Vector3(0, -60, 0);
+                Vector3 m_EulerAngleVelocityPos = new Vector3(0, -60, 0);
+                Vector3 m_EulerAngleVelocityNeg = new Vector3(0, 60, 0);
                 Quaternion deltaRotationPos = Quaternion.Euler(m_EulerAngleVelocityPos);
                 Quaternion deltaRotationNeg = Quaternion.Euler(m_EulerAngleVelocityNeg);
 
@@ -316,8 +321,9 @@ public class HatrisHatPlacer : MonoBehaviour
 
                 thisHatRot = transform.eulerAngles;
                 thisHatRotInt = Mathf.RoundToInt(thisHatRot.y / 60) % 6;
-            }
 
+                updateGlow();
+            }
         }
     }
     public void Deselect()
@@ -409,8 +415,6 @@ public class HatrisHatPlacer : MonoBehaviour
                             if (meshCells[i].hatPieceAbove != null)
                             {
                                 TriggerFlash(3,meshCells[i].hatPieceAbove.gameObject);
-
-                        Debug.Log("object " + i + ": " + meshCells[i].hatPieceAbove.gameObject);
                             }
                         }
 
@@ -431,6 +435,9 @@ public class HatrisHatPlacer : MonoBehaviour
                             isSelected = false;
                             gameManager.tileSelected = false;
                             gameManager.selectedTile = null;
+
+                            SetGlow(false);
+                            
 
                             GameObject[] hatPieces = new GameObject[8];
 
@@ -677,7 +684,6 @@ public class HatrisHatPlacer : MonoBehaviour
             piece.GetComponent<MeshRenderer>().material.color = colour;
         }
     }
-
     public bool CheckIfPlacementScores(HexCell landCell, out List<HexCell> validCells)
     {
         validCells = new List<HexCell>();  // Initialize the list to store valid HexCells
@@ -790,47 +796,47 @@ public class HatrisHatPlacer : MonoBehaviour
                 }
                 else
                 {
-                    int count2a = 0, count3a = 0, count4a = 0, count2b = 0, count3b = 0, count4b = 0;
+                    int count2 = 0, count3 = 0, count4 = 0;
 
                     for (int i = 0; i < 6; i++)
                     {
                         if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
                         {
-                            count2a++;
+                            count2++;
                         }
                         if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count2b++;
+                            count2++;
                         }
                         if (landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && landCell.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count2b = count2b + 10;
+                            count2 = count2 + 10;
                         }
 
                         if (neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
                         {
-                            count3a++;
+                            count3++;
                         }
                         if (neighbour1 && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count3b++;
+                            count3++;
                         }
                         if (neighbour1 && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && neighbour1.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count3b = count3b + 10;
+                            count3 = count3 + 10;
                         }
 
                         if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null)
                         {
-                            count4a++;
+                            count4++;
                         }
                         if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove == null && neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count4b++;
+                            count4++;
                         }
                         if (neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().hatPieceAbove != null && neighbour2.transform.GetChild(0).GetChild(i).GetComponent<HatrisHexCell>().potentialPieceAbove != null)
                         {
-                            count4b = count4b + 10;
+                            count4 = count4 + 10;
                         }
                     }
 
@@ -854,15 +860,15 @@ public class HatrisHatPlacer : MonoBehaviour
                         }
                     }
 
-                    if (count2a + count2b == 6)
+                    if (count2 == 6)
                     {
                         validCells.Add(landCell);
                     }
-                    if (count3a + count3b == 6)
+                    if (count3 == 6)
                     {
                         validCells.Add(neighbour1);
                     }
-                    if (count4a + count4b == 6)
+                    if (count4 == 6)
                     {
                         validCells.Add(neighbour2);
                     }
@@ -871,5 +877,72 @@ public class HatrisHatPlacer : MonoBehaviour
         }
 
         return validCells.Count > 0;  // Return true if there are valid cells, otherwise false
+    }
+
+    public void SetGlow(bool active)
+    {
+        if (isGlowing == active) return; // Avoid redundant updates
+
+        isGlowing = active;
+
+        for (int i = 0; i < presentValidCells.Length; i++)
+        {
+            if (presentValidCells[i] != null)
+            {
+                // Cache frequently accessed components
+                Transform cellTransform = presentValidCells[i].transform;
+                Transform childTransform = cellTransform.GetChild(0);
+                MeshRenderer[] meshRenderers = new MeshRenderer[6];
+
+                // Cache mesh renderers for all child cells (6 in total)
+                for (int j = 0; j < 6; j++)
+                {
+                    meshRenderers[j] = childTransform.GetChild(j).gameObject.GetComponent<MeshRenderer>();
+                }
+
+                if (active)
+                {
+                    // Enable glow and set emission color for all child cells
+                    for (int j = 0; j < 6; j++)
+                    {
+                        MeshRenderer meshRenderer = meshRenderers[j];
+                        Material material = meshRenderer.material;
+
+                        // Enable emission
+                        material.EnableKeyword("_EMISSION");
+                        material.SetColor("_EmissionColor", glowColor * 2f); // Boost intensity
+
+                        // Activate particles
+                        hexGrid.scoreParticles[i].transform.position = presentValidCells[i].transform.position;
+                        hexGrid.scoreParticles[i].gameObject.SetActive(true);
+                        if (!hexGrid.scoreParticles[i].isPlaying)
+                        {
+                            hexGrid.scoreParticles[i].Play();
+                        }
+                    }
+                }
+                else
+                {
+                    // Disable glow and reset emission color for all child cells
+                    for (int j = 0; j < 6; j++)
+                    {
+                        MeshRenderer meshRenderer = meshRenderers[j];
+                        Material material = meshRenderer.material;
+
+                        // Disable emission
+                        material.DisableKeyword("_EMISSION");
+                        material.SetColor("_EmissionColor", defaultMat.color);
+
+                        // Deactivate and clear particles
+                        if (hexGrid.scoreParticles[i].isPlaying)
+                        {
+                            hexGrid.scoreParticles[i].Stop();
+                            hexGrid.scoreParticles[i].Clear();
+                        }
+                        hexGrid.scoreParticles[i].gameObject.SetActive(false);
+                    }
+                }
+            }
+        }
     }
 }

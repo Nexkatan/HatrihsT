@@ -92,7 +92,7 @@ public class HatrisScoreKeeper : MonoBehaviour
         score2 = 0;
         foreach (HexCell cell in grid.cells)
         {
-            if (cell.isHatrisCell)
+            if (cell != null)
             {
                 if (cell.playerCellScored == 1)
                 {
@@ -359,13 +359,20 @@ public class HatrisScoreKeeper : MonoBehaviour
                 button.interactable = true;
             }
         }
+        foreach  (Button button in HatTab.GetComponent<HatTab>().hints.GetComponentsInChildren<Button>())
+        {
+            button.interactable = true;
+        }
         foreach (HatrisHatPlacer hat in GameObject.FindObjectsOfType<HatrisHatPlacer>())
         {
             Destroy(hat.gameObject);
         }
         foreach (HexCell cell in grid.cells)
         {
-            cell.playerCellScored = 0;
+            if (cell != null)
+            {
+                cell.playerCellScored = 0;
+            }
         }
         foreach (HatrisHexCell cell in cellCells)
         {

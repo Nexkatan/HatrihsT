@@ -5,6 +5,7 @@ using UnityEngine.UIElements;
 using System.IO;
 using System;
 using Unity.VisualScripting;
+using System.Linq;
 
 public class HexGrid : MonoBehaviour
 {
@@ -17,8 +18,6 @@ public class HexGrid : MonoBehaviour
 
     public HexCell[] cells;
 
-    public TextMeshProUGUI cellLabelPrefab;
-    
     public Material[] materials;
     public Material[] hatMats;
 
@@ -45,6 +44,7 @@ public class HexGrid : MonoBehaviour
     public GameObject backgrounds;
     public int backgroundNumber;
 
+    public ParticleSystem[] scoreParticles = new ParticleSystem[3];
 
     void Awake()
     {
@@ -123,18 +123,8 @@ public class HexGrid : MonoBehaviour
         }
 
 
-        TextMeshProUGUI label = Instantiate<TextMeshProUGUI>(cellLabelPrefab);
-       
-        label.rectTransform.anchoredPosition =
-        new Vector2(position.x, position.z / cellPrefab.inlaySize);
-        cell.uiRect = label.rectTransform;
-
         AddCellToChunk(x, z, cell);
 
-        if (HexCoordinatesOn)
-        {
-            label.text = cell.coordinates.ToStringOnSeparateLines();
-        };
 
         if (cellCell)
         {
@@ -206,6 +196,8 @@ public class HexGrid : MonoBehaviour
         chunkCountZ = cellCountZ / HexMetrics.chunkSizeZ;
         CreateChunks();
         CreateCells();
+
+        DestroyUnusedCellsHex(cells);
         return true;
     }
     
@@ -220,10 +212,7 @@ public class HexGrid : MonoBehaviour
                 cell.isHatrisCell = true;
                 HatrisHexCell hatrisCell = Instantiate<HatrisHexCell>(cellCellPrefab);
 
-                TextMeshProUGUI label = Instantiate<TextMeshProUGUI>(cellLabelPrefab);
-
-                label.rectTransform.SetParent(hatrisCell.transform);
-                label.rectTransform.anchoredPosition = new Vector3(1 * cellCountZ, 0.5f, 0);
+                cell.uiRect = new Vector3(1 * cellCountZ, 0.5f, 0);
 
                 hatrisCell.transform.position = cell.transform.position;
 
@@ -234,7 +223,25 @@ public class HexGrid : MonoBehaviour
         }
         
     }
+    
 
+    public void DestroyUnusedCellsHex(HexCell[] hexCells)
+    {
+        int neighbourLength = Enum.GetValues(typeof(HexDirection)).Length;
+
+        for (int i = 0; i < hexCells.Length; i++)
+        {
+            if (hexCells[i].coordinates.X < centrePoint.x - HexMapRadius || hexCells[i].coordinates.X > centrePoint.x + HexMapRadius || hexCells[i].coordinates.Z < centrePoint.y - HexMapRadius || hexCells[i].coordinates.Z > centrePoint.y + HexMapRadius || -(hexCells[i].coordinates.X + hexCells[i].coordinates.Z) < -(centrePoint.x + centrePoint.y) - HexMapRadius || -(hexCells[i].coordinates.X + hexCells[i].coordinates.Z) > -(centrePoint.x + centrePoint.y) + HexMapRadius)
+            {
+                for (int j = 0; j < neighbourLength; j++)
+                {
+                    cells[i].ResetNeighbour(hexCells[i]);
+                }
+                Destroy(hexCells[i].gameObject);
+                cells[i] = null;
+            }
+        }
+    }
 
     public void Save(BinaryWriter writer)
     {
@@ -252,10 +259,6 @@ public class HexGrid : MonoBehaviour
         HexMapRadius = GameManager.hatrisBoardSize;
 
         CreateMap(20, 15);
-        foreach (HexCell cell in cells) 
-        {
-            cell.GetComponent<MeshRenderer>().material = HexMetrics.materials[1];
-        }
     }
 
 }

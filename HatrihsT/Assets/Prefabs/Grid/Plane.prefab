@@ -137,7 +137,7 @@ MonoBehaviour:
   hatRotInt: 0
   hatAbove: {fileID: 0}
   hatAboveMat: {fileID: 0}
-  particle: {fileID: 3601096500326721774, guid: b144346e29896504c8d872b3bd519b19, type: 3}
+  particle: {fileID: 0}
   neighbors: []
   uiRect: {fileID: 0}
   chunk: {fileID: 0}
